@@ -2,17 +2,37 @@ package main
 
 import (
 	"net/http"
-	"github.com/russross/blackfriday"
+	"log"
+	"github.com/googollee/go-socket.io"
 )
 
 func main() {
-	http.HandleFunc("/new-game", GenerateMarkdown)
+
+    server, err := socketio.NewServer(nil)
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    server.On("connection", func(so socketio.Socket) {
+    	log.Println("new player")
+    	so.Join("game")
+        
+    	so.On("estimate", func (msg string) {
+			log.Println(msg)
+			so.BroadcastTo("game", "estimate", msg);
+    	})
+
+        so.On("disconnection", func() {
+    		log.Println("player left")
+        })
+    })
+    server.On("error", func(so socketio.Socket, err error) {
+        log.Println("error:", err)
+    })
+
+	http.Handle("/socket.io/", server)
 	http.Handle("/", http.FileServer(http.Dir("public")))
 	http.ListenAndServe(":8080", nil)
 }
 
-func GenerateMarkdown(rw http.ResponseWriter, r *http.Request) {
-	markdown := blackfriday.MarkdownCommon([]byte(r.FormValue("name")))
-	rw.Write(markdown)
-}
 
