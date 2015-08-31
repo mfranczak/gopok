@@ -1,4 +1,12 @@
+/*
+ * This javascript needs serious changes.
+ * The aproach was, first build a working feature then refactor.
+ */
 $(document).ready(function() {
+	/**
+	 * Opens a modal which asks for user name.
+	 * @todo validation: only letters, max-length=8, unique in the game 
+	 */
 	var getUserName = function() {
 		$('#modal-username').modal('show');
 
@@ -11,8 +19,15 @@ $(document).ready(function() {
 		});
 	};
 	
-	getUserName();
+	// current user name
+	var user = "";
+	if (user == "") {
+		getUserName();	
+	}
 
+	/**
+	 * Adds estimation to game results
+	 */
 	var updateEstimation = function (user, estimate) {
 		var p = $('#game').find('p#' + user).first();
 		
@@ -24,17 +39,34 @@ $(document).ready(function() {
 		span = $('<span class="label label-info">' + estimate + '</span>')
 		p.text(user);
 		p.append(span);
+	};
 
-
+	/**
+	 * Adds players to the list of active users
+	 */
+	var updatePlayersList = function (playerName) {
+		var player = $('<li />');
+		player.text(playerName);
+		if (user == playerName) {
+			player.addClass("text-primary");
+		}
+		$('#players').append(player);
 	};
 
 	var startGame = function (user) {
 		var socket = io();
 
+		socket.emit('new_player', user);
+		updatePlayersList(user);
+
 		$('.estimates a').click(function() {
 			var estimate = "" + $(this).data('val');
 			updateEstimation(user, estimate);
 			socket.emit('estimate', user + ":" + estimate);
+		});
+
+		socket.on('new_player', function(msg) {
+			updatePlayersList(msg);
 		});
 
 		socket.on('estimate', function(msg) {
