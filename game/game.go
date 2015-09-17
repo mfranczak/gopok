@@ -1,5 +1,9 @@
 package game
 
+import (
+	"log"
+)
+
 type Game struct {
 	players []*Player
 }
@@ -34,6 +38,9 @@ func (g *Game) Vote(playerName string, vote int) {
 	for _, player := range g.players {
 		if player.Name == playerName {
 			player.Vote = vote
+			return
 		}
 	}
+
+	log.Printf("[ERROR] problem with voting player=%s, vote=%d", playerName, vote)
 }

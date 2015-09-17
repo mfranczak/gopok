@@ -44,12 +44,18 @@ $(document).ready(function() {
 	/**
 	 * Adds players to the list of active users
 	 */
-	var updatePlayersList = function (playerName) {
+	var updatePlayersList = function (playerObject) {
+		var playerName = playerObject.Name;
 		var player = $('<li />');
 		player.text(playerName);
 		if (user == playerName) {
 			player.addClass("text-primary");
 		}
+
+		if (playerObject.Vote > 0) {
+			updateEstimation(playerName, playerObject.Vote)
+		}
+
 		$('#players').append(player);
 	};
 
@@ -67,6 +73,7 @@ $(document).ready(function() {
 
 		socket.on('new_player', function(msg) {
 			$('#players').empty()
+
 			$.each(msg, function(i,e) {
 				updatePlayersList(e);
 			})
