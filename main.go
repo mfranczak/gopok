@@ -2,20 +2,13 @@ package main
 
 import (
 	"github.com/googollee/go-socket.io"
+	"github.com/mfranczak/gopok/game"
 	"log"
 	"net/http"
 )
 
-type Game struct {
-	players []string
-}
-
-func (g *Game) AddPlayer(player string) {
-	g.players = append(g.players, player)
-}
-
 func main() {
-	var g = new(Game)
+	var game = new(game.Game)
 
 	server, err := socketio.NewServer(nil)
 	if err != nil {
@@ -24,7 +17,6 @@ func main() {
 
 	server.On("connection", func(so socketio.Socket) {
 		so.Join("game")
-		so.BroadcastTo("game", "new_player", g.players)
 
 		so.On("estimate", func(msg string) {
 			log.Println(msg)
@@ -32,9 +24,9 @@ func main() {
 		})
 
 		so.On("new_player", func(msg string) {
-			g.AddPlayer(msg)
-			so.Emit("new_player", g.players)
-			so.BroadcastTo("game", "new_player", g.players)
+			game.AddPlayer(msg)
+			so.Emit("new_player", game.Players)
+			so.BroadcastTo("game", "new_player", game.Players)
 		})
 
 		so.On("disconnection", func() {
