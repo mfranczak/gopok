@@ -1,9 +1,13 @@
 package game
 
 type Game struct {
-	Players []string
+	players []string
 }
 
 func (g *Game) AddPlayer(player string) {
-	g.Players = append(g.Players, player)
+	g.players = append(g.players, player)
+}
+
+func (g *Game) GetPlayers() []string {
+	return g.players
 }

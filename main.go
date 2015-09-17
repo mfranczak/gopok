@@ -25,8 +25,8 @@ func main() {
 
 		so.On("new_player", func(msg string) {
 			game.AddPlayer(msg)
-			so.Emit("new_player", game.Players)
-			so.BroadcastTo("game", "new_player", game.Players)
+			so.Emit("new_player", game.GetPlayers())
+			so.BroadcastTo("game", "new_player", game.GetPlayers())
 		})
 
 		so.On("disconnection", func() {
