@@ -66,7 +66,10 @@ $(document).ready(function() {
 		});
 
 		socket.on('new_player', function(msg) {
-			updatePlayersList(msg);
+			$('#players').empty()
+			$.each(msg, function(i,e) {
+				updatePlayersList(e);
+			})
 		});
 
 		socket.on('estimate', function(msg) {

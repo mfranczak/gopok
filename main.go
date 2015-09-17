@@ -6,7 +6,16 @@ import (
 	"net/http"
 )
 
+type Game struct {
+	players []string
+}
+
+func (g *Game) AddPlayer(player string) {
+	g.players = append(g.players, player)
+}
+
 func main() {
+	var g = new(Game)
 
 	server, err := socketio.NewServer(nil)
 	if err != nil {
@@ -15,6 +24,7 @@ func main() {
 
 	server.On("connection", func(so socketio.Socket) {
 		so.Join("game")
+		so.BroadcastTo("game", "new_player", g.players)
 
 		so.On("estimate", func(msg string) {
 			log.Println(msg)
@@ -22,8 +32,9 @@ func main() {
 		})
 
 		so.On("new_player", func(msg string) {
-			log.Println("new play joined")
-			so.BroadcastTo("game", "new_player", msg)
+			g.AddPlayer(msg)
+			so.Emit("new_player", g.players)
+			so.BroadcastTo("game", "new_player", g.players)
 		})
 
 		so.On("disconnection", func() {
